@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var Cat = require('./cat');
 
-function clamp(value, min, max) {
+function valueToRatio(value, min, max) {
   if (value < min) {
     return 0;
   } else if (value > max) {
@@ -88,7 +88,7 @@ _.assign(Car.prototype, {
       catNear = 0;
     } else {
       var inverseDistance = 600 - (nearestCat.y - this.pos);
-      catNear = clamp(inverseDistance, 0, 600);
+      catNear = valueToRatio(inverseDistance, 0, 600);
     }
 
     return {
