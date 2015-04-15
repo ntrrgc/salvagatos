@@ -1,15 +1,6 @@
 var _ = require('lodash');
 var Cat = require('./cat');
-
-function valueToRatio(value, min, max) {
-  if (value < min) {
-    return 0;
-  } else if (value > max) {
-    return 1;
-  } else {
-    return (value - min) / (max - min);
-  }
-}
+var valueToRatio = require('./value-to-ratio');
 
 function Car() {
   this.pos = 100;
