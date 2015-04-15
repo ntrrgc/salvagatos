@@ -1,10 +1,7 @@
 var _ = require('lodash');
 var Cat = require('./cat');
 var valueToRatio = require('./value-to-ratio');
-
-function intersection() {
-
-}
+var d3 = require('d3');
 
 function Car() {
   this.pos = 100;
@@ -17,6 +14,12 @@ function Car() {
   this.debugShape = false;
   this.debugPoints = false;
   this.debugCentroid = true;
+  this.shouldThink = true;
+
+  //this.speed = 0;
+  //this.shouldThink = false;
+
+  this.plotFuzzySets();
 }
 
 _.assign(Car.prototype, {
@@ -38,9 +41,8 @@ _.assign(Car.prototype, {
       'near': {from: 0.5}
     },
     'speed': {
-      'slow': {to: 0.3},
-      'mid': {from: 0.2, to: 0.8},
-      'fast': {from: 0.7}
+      'slow': {to: 0.7},
+      'fast': {from: 0.3}
     }
   },
 
@@ -63,15 +65,6 @@ _.assign(Car.prototype, {
       ],
       action: [
         {effector: 'accelerator', value: 'accelerate'}
-      ]
-    },
-    {
-      preconditions: [
-        {sensor: 'speed', value: 'mid'},
-        {sensor: 'cat', value: 'present'}
-      ],
-      action: [
-        {effector: 'accelerator', value: 'still'}
       ]
     },
     {
@@ -169,6 +162,8 @@ _.assign(Car.prototype, {
   },
 
   think: function () {
+    if (!this.shouldThink) return;
+
     // Ponderate rules
     var self = this;
     var readings = this.readSensors();
@@ -326,6 +321,8 @@ _.assign(Car.prototype, {
   },
 
   drawDebug: function (ctx) {
+    if (!this.shouldThink) return;
+
     function y(val) {
       return 190 - 30 * val;
     }
@@ -382,6 +379,129 @@ _.assign(Car.prototype, {
       ctx.lineTo(x(this.centroid), y(-1));
       ctx.stroke();
       ctx.closePath();
+    }
+  },
+
+  plotFuzzySets: function() {
+    var chart = d3.select('#fuzzy-sets');
+    var margin = {
+      left: 40, right: 10
+    }
+    var x = d3.scale.linear()
+        .range([margin.left, chart.attr('width') - margin.left - margin.right])
+        .domain([0, 1])
+
+    function rangeToPath(range) {
+      if (!('from' in range)) {
+        return [
+          {x: 0, y: 1},
+          {x: range.to, y: 0}
+        ]
+      } else if (!('to' in range)) {
+        return [
+          {x: range.from, y: 0},
+          {x: 1, y: 1}
+        ]
+      } else {
+        return [
+          {x: range.from, y: 0},
+          {x: (range.from + range.to) / 2, y: 1},
+          {x: range.to, y: 0},
+        ]
+      }
+    }
+
+    var chartHeight = 170
+    var variables = [
+      {name: 'speed', ranges: this.sensorLabels['speed']},
+      {name: 'cat', ranges: this.sensorLabels['cat']},
+      {name: 'accelerator', ranges:this.effectorLabels['accelerator']}
+    ]
+
+    chart.selectAll('g.variable')
+        .data(variables)
+        .enter()
+        .append('g')
+        .attr('class', 'variable')
+        .each(function (d, i) {
+          return plotVariable(d3.select(this), 60 + chartHeight * i, d.ranges, d.name);
+        })
+
+    function plotVariable(chart, y0, fuzzySetsRanges, name) {
+      var colors = ['red', 'green', 'blue']
+      var i = 0
+      var fuzzySets = _.map(fuzzySetsRanges, function (range, setName) {
+        return {
+          setName: setName,
+          range: range,
+          path: rangeToPath(range),
+          color: colors[i++ % 3]
+        }
+      });
+
+      var height = 100;
+      var y = d3.scale.linear()
+          .range([y0 + height, y0])
+          .domain([0, 1]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient('bottom')
+          .ticks(5)
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .ticks(3)
+          .orient('left')
+      var yAxis2 = d3.svg.axis()
+          .scale(y)
+          .ticks(3)
+          .orient('right')
+
+      chart.append('g')
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0,' + (y0 + height) + ')')
+          .call(xAxis)
+      chart.append('g')
+          .attr('class', 'y axis')
+          .attr('transform', 'translate(' + margin.left + ','
+                                        + 0 + ')')
+          .call(yAxis)
+      chart.append('g')
+          .attr('class', 'y axis')
+          .attr('transform', 'translate(' + x(1) + ','
+          + 0 + ')')
+          .call(yAxis2)
+
+      var line = d3.svg.line()
+          .x(function (d) {
+            return x(d.x);
+          })
+          .y(function (d) {
+            return y(d.y);
+          })
+
+      var enter = chart.selectAll('path.line')
+        .data(fuzzySets).enter()
+      enter
+        .append('path')
+        .attr('class', 'line')
+        .attr('d', function (d) {
+          return line(d.path)
+        })
+        .style('stroke', function (d) {
+          return d.color
+        })
+        .style('fill', 'none')
+      enter
+        .append('text')
+          .attr('class', 'label')
+          .attr('y', y0 - 20)
+          .attr('x', function (d) {
+            return x((d.path[0].x + d.path[d.path.length - 1].x) / 2);
+          })
+          .text(function (d) {
+            return d.setName;
+          })
     }
   }
 });

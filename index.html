@@ -3,9 +3,37 @@
 <head lang="es">
     <meta charset="UTF-8">
     <title>Salvagatos</title>
+    <style>
+        #fuzzy-sets {
+            vertical-align: top;
+        }
+        html {
+            font-family: Arial;
+        }
+
+        .axis text {
+            font-size: 13px;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        rect {
+            shape-rendering: crispEdges;
+        }
+        .label {
+            text-anchor: middle;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
     <canvas id="game" width="400" height="800"></canvas>
+    <svg width="300" height="800" id="fuzzy-sets"></svg>
 
     <script src="build/js/app.js"></script>
 </body>
