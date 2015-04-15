@@ -32,7 +32,11 @@ var game = new Game(canvas, {
     var car = this.car;
     this.addGameNode('plotSpeed', new Plot(0, 10, function () {
       return car.speed;
-    }, 10));
+    }, 0, 10));
+
+    this.addGameNode('plotAccel', new Plot(0, 50, function () {
+      return car.accel;
+    }, -0.1, 0.05));
   },
 
   draw: function (ctx) {
@@ -50,6 +54,7 @@ var game = new Game(canvas, {
     this.car.draw(ctx);
 
     this.plotSpeed.draw(ctx);
+    this.plotAccel.draw(ctx);
 
     ctx.restore();
   },
