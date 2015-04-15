@@ -13,7 +13,8 @@ var Game = require('./game');
 var Car = require('./car');
 var Cat = require('./cat');
 var CatSpawner = require('./cat-spawner');
-var Road = require('./road')
+var Road = require('./road');
+var Plot = require('./plot');
 
 var canvas = document.getElementById('game');
 
@@ -27,12 +28,16 @@ var game = new Game(canvas, {
     this.addGameNode('car', new Car());
     this.addGameNode('road', new Road(this.car));
     this.addGameNode('catSpawner', new CatSpawner());
+
+    var car = this.car;
+    this.addGameNode('plotSpeed', new Plot(0, 10, function () {
+      return car.speed;
+    }, 10));
   },
 
   draw: function (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-
 
     this.road.draw(ctx);
 
@@ -43,6 +48,8 @@ var game = new Game(canvas, {
       }
     }
     this.car.draw(ctx);
+
+    this.plotSpeed.draw(ctx);
 
     ctx.restore();
   },
