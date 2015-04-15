@@ -6,16 +6,25 @@ function Road(car) {
 
 _.assign(Road.prototype, {
   update: function () {
-    //this.offset = this.car.pos + 600;
   },
 
   draw: function (ctx) {
+    var top = 60;
+    var left = 50;
+    var width = 300;
+    var height = 800;
+
     ctx.beginPath();
     ctx.strokeStyle = 'black';
     ctx.fillStyle = 'lightgray';
 
-    ctx.fillRect(50, -30, 300, 840);
-    ctx.strokeRect(50, -30, 300, 840);
+    ctx.fillRect(left, top, width, height);
+    ctx.beginPath();
+    ctx.moveTo(left, top);
+    ctx.lineTo(left, top + height);
+    ctx.moveTo(left + width, top);
+    ctx.lineTo(left + width, top + height);
+    ctx.stroke();
     ctx.closePath();
 
     // Draw lines
