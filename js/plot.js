@@ -1,10 +1,12 @@
 var _ = require('lodash');
 var Cat = require('./cat');
+var valueToRatio = require('./value-to-ratio');
 
-function Car(x, y, variable, maxValue) {
+function Car(x, y, variable, minValue, maxValue) {
   this.x = x;
   this.y = y;
   this.variable = variable;
+  this.minValue = minValue;
   this.maxValue = maxValue;
   this.history = [];
   this.width = 400;
@@ -20,17 +22,37 @@ _.assign(Car.prototype, {
   },
 
   draw: function (ctx) {
-    ctx.strokeStyle = 'red';
-    ctx.fillStyle = '#FFFFFF';
+    var self = this;
+    function y(value) {
+      return self.y + self.height * (1 - valueToRatio(value, self.minValue, self.maxValue));
+    }
+    ctx.save();
+    ctx.translate(0.5, 0.5);
+
+    // Background
+    ctx.fillStyle = '#EEEEEE';
     ctx.fillRect(this.x, this.y, this.width, this.height);
+
+    // X axis
+    ctx.strokeStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(this.x, y(0));
+    ctx.lineTo(this.x + this.width, y(0));
+    ctx.stroke();
+    ctx.closePath();
+
+    // Line
+    ctx.strokeStyle = 'red';
     ctx.beginPath();
     var value = this.history[0];
-    ctx.moveTo(this.x + i, this.y + (1 - (value / this.maxValue)) * this.height);
+    ctx.moveTo(this.x + i, y(value));
     for (var i = 1; i < this.history.length; i++) {
-      var value = this.history[i];
-      ctx.lineTo(this.x + i, this.y + (1 - (value / this.maxValue)) * this.height);
+      value = this.history[i];
+      ctx.lineTo(this.x + i, y(value));
     }
     ctx.stroke();
+
+    ctx.restore();
   },
 });
 
