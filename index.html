@@ -2,6 +2,35 @@
 <html>
 <head lang="es">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="http://jsconsole.com/remote.js?E214DDE1-1EA1-4812-B025-AA835ED312DC"></script>
+
+    <script>
+        (function(){
+
+            if ("performance" in window == false) {
+                window.performance = {};
+            }
+
+            Date.now = (Date.now || function () {  // thanks IE8
+                return new Date().getTime();
+            });
+
+            if ("now" in window.performance == false){
+
+                var nowOffset = Date.now();
+
+                if (performance.timing && performance.timing.navigationStart){
+                    nowOffset = performance.timing.navigationStart
+                }
+
+                window.performance.now = function now(){
+                    return Date.now() - nowOffset;
+                }
+            }
+
+        })();
+    </script>
     <title>Salvagatos</title>
     <style>
         #fuzzy-sets {
