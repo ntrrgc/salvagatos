@@ -36,7 +36,7 @@ _.assign(Car.prototype, {
 
   sensorLabels: {
     'cat': {
-      'no': {to: 0.2},
+      'no': {to: 0.3},
       'present': {from: 0.1, to: 0.7},
       'near': {from: 0.5}
     },
@@ -83,6 +83,15 @@ _.assign(Car.prototype, {
       action: [
         {effector: 'accelerator', value: 'brake'}
       ]
+    },
+    {
+      preconditions: [
+        {sensor: 'speed', value: 'slow'},
+        {sensor: 'cat', value: 'present'}
+      ],
+      action: [
+        {effector: 'accelerator', value: 'still'}
+      ]
     }
   ],
   
@@ -104,7 +113,13 @@ _.assign(Car.prototype, {
     } else {
       var inverseDistance = 600 - (nearestCat.y - this.pos);
       catNear = valueToRatio(inverseDistance, 0, 600);
+      if (nearestCat.x < 30) {
+        catNear -= 1 - valueToRatio(nearestCat.x, 0, 30);
+      } else if (nearestCat.x > 300) {
+        catNear -= valueToRatio(nearestCat.x, 300, 350);
+      }
     }
+    this.cat = catNear;
 
     return {
       speed: speed,
@@ -331,6 +346,9 @@ _.assign(Car.prototype, {
     }
 
     if (this.debugTrapezoids) {
+      ctx.save();
+      ctx.translate(0.5, 0.5);
+
       var colors = ['blue', 'green', 'red']
       for (var i = 0; i < this.trapezoids.length; i++) {
         var trapezoid = this.trapezoids[i];
@@ -345,6 +363,14 @@ _.assign(Car.prototype, {
         ctx.stroke();
         ctx.closePath();
       }
+      ctx.strokeStyle = 'black';
+      ctx.beginPath();
+      ctx.moveTo(x(0), y(0))
+      ctx.lineTo(x(1), y(0));
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.restore();
     }
 
     if (this.debugShape) {

@@ -2,7 +2,8 @@ var _ = require('lodash');
 
 function Cat(car) {
   this.x = 0;
-  this.y = car.pos + 250 + 350 * Math.random();
+  var distance = 250 + 200 * Math.random();
+  this.y = car.pos + distance;
   this.speed = 1 + Math.random() * 2;
 }
 

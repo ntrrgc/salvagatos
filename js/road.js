@@ -9,7 +9,7 @@ _.assign(Road.prototype, {
   },
 
   draw: function (ctx) {
-    var top = 90;
+    var top = 140;
     var left = 50;
     var width = 300;
     var height = 800;
